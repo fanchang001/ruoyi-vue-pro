@@ -358,7 +358,32 @@ export default {
   watch: {
     // 根据名称筛选部门树
     deptName(val) {
-      this.$refs.tree.filter(val);
+            if (val) {
+        this.deptOptions = this.tree
+      }
+      const treeFilter = (tree, func) => {
+        // console.log(tree);
+        // 使用map复制一下节点，避免修改到原树
+        return tree
+          .map((node) => ({ ...node }))
+          .filter((node) => {
+            if (func(node)) {
+              return node
+            }
+            node.children = node.children && treeFilter(node.children, func)
+            return (func(node)) || (node.children && node.children.length)
+          })
+      }
+      const func = (item) => item.name.includes(val)
+      this.deptOptions = this.tree
+        .map((node) => ({ ...node }))
+        .filter((node) => {
+          if (func(node)) {
+            return node
+          }
+          node.children = node.children && treeFilter(node.children, func)
+          return (func(node)) || (node.children && node.children.length)
+        })
     }
   },
   created() {
